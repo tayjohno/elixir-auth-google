@@ -80,6 +80,7 @@ defmodule ElixirAuthGoogle do
          client_secret: google_client_secret(),
          redirect_uri: generate_redirect_uri(conn),
          grant_type: "authorization_code",
+         access_type: "offline",
          code: code
     })
     inject_poison().post(@google_token_url, body)
