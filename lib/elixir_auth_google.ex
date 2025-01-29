@@ -3,7 +3,7 @@ defmodule ElixirAuthGoogle do
   Minimalist Google OAuth Authentication for Elixir Apps.
   Extensively tested, documented, maintained and in active use in production.
   """
-  @google_auth_url "https://accounts.google.com/o/oauth2/v2/auth?response_type=code&access_type=offline"
+  @google_auth_url "https://accounts.google.com/o/oauth2/v2/auth?response_type=code&access_type=offline&prompt=consent"
   @google_token_url "https://oauth2.googleapis.com/token"
   @google_user_profile "https://www.googleapis.com/oauth2/v3/userinfo"
   @default_scope "profile email"
