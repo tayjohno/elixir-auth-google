@@ -257,6 +257,45 @@ config :elixir_auth_google,
 With that configured, your App will gain access to the requested services
 once the person authenticates/authorizes. 
 
+### _Optional_: Access Type and Prompt Parameters
+
+You can also specify optional parameters when generating the OAuth URL:
+
+- `access_type`: Set to `"offline"` to receive a refresh token that allows your app to access Google APIs when the user is not present
+- `prompt`: Set to `"consent"` to force the authorization server to prompt the user for consent (useful to re-authorize or get updated permissions)
+- `state`: A custom state parameter for CSRF protection
+
+#### Examples:
+
+Basic usage (no optional parameters):
+```elixir
+oauth_google_url = ElixirAuthGoogle.generate_oauth_url(conn)
+```
+
+With offline access (to get a refresh token):
+```elixir
+oauth_google_url = ElixirAuthGoogle.generate_oauth_url(conn, %{access_type: "offline"})
+```
+
+Force consent screen:
+```elixir
+oauth_google_url = ElixirAuthGoogle.generate_oauth_url(conn, %{prompt: "consent"})
+```
+
+Multiple parameters:
+```elixir
+oauth_google_url = ElixirAuthGoogle.generate_oauth_url(conn, %{
+  access_type: "offline",
+  prompt: "consent",
+  state: "random_string_for_csrf_protection"
+})
+```
+
+> **Note**: The `state` parameter can also be passed as a string for backward compatibility:
+> ```elixir
+> oauth_google_url = ElixirAuthGoogle.generate_oauth_url(conn, "my_state_value")
+> ```
+
 <br /> <br />
 
 
