@@ -3,7 +3,7 @@ defmodule ElixirAuthGoogle do
   Minimalist Google OAuth Authentication for Elixir Apps.
   Extensively tested, documented, maintained and in active use in production.
   """
-  @google_auth_url "https://accounts.google.com/o/oauth2/v2/auth?response_type=code&access_type=offline&prompt=consent"
+  @google_auth_url "https://accounts.google.com/o/oauth2/v2/auth?response_type=code"
   @google_token_url "https://oauth2.googleapis.com/token"
   @google_user_profile "https://www.googleapis.com/oauth2/v3/userinfo"
   @default_scope "profile email"
@@ -48,11 +48,28 @@ defmodule ElixirAuthGoogle do
   """
   @spec generate_oauth_url(conn) :: String.t
   def generate_oauth_url(conn) do
+    generate_oauth_url(conn, %{})
+  end
+
+  @doc """
+  `generate_oauth_url/2` creates the Google OAuth2 URL with optional parameters.
+  Available options:
+  - `access_type`: Set to "offline" to receive a refresh token
+  - `prompt`: Set to "consent" to force re-authorization
+  - `state`: Custom state parameter for CSRF protection
+  """
+  @spec generate_oauth_url(conn, map) :: String.t
+  def generate_oauth_url(conn, opts) when is_map(opts) do
     query = %{
       client_id: google_client_id(),
       scope: google_scope(),
       redirect_uri: generate_redirect_uri(conn)
     }
+
+    # Add optional parameters if provided
+    query = add_optional_param(query, opts, :access_type)
+    query = add_optional_param(query, opts, :prompt)
+    query = add_optional_param(query, opts, :state)
 
     params = URI.encode_query(query, :rfc3986)
 
@@ -60,11 +77,10 @@ defmodule ElixirAuthGoogle do
   end
 
   @doc """
-  Same as `generate_oauth_url/1` with `state` query parameter
+  Same as `generate_oauth_url/1` with `state` query parameter (for backward compatibility)
   """
   def generate_oauth_url(conn, state) when is_binary(state) do
-    params = URI.encode_query(%{state: state}, :rfc3986)
-    generate_oauth_url(conn) <> "&#{params}"
+    generate_oauth_url(conn, %{state: state})
   end
 
   @doc """
@@ -131,5 +147,12 @@ defmodule ElixirAuthGoogle do
 
   defp google_scope do
     System.get_env("GOOGLE_SCOPE") || Application.get_env(:elixir_auth_google, :google_scope) || @default_scope
+  end
+
+  defp add_optional_param(query, opts, key) do
+    case Map.get(opts, key) do
+      nil -> query
+      value -> Map.put(query, key, value)
+    end
   end
 end
